@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { Home, FolderOpen, ThumbsUp, Settings, Layers, Menu, X } from "lucide-react"
+import { Home, FolderOpen, ThumbsUp, Settings, Layers, Menu, X, GitBranch } from "lucide-react"
 
 const navigationItems = [
   {
@@ -32,6 +32,12 @@ const navigationItems = [
     href: "/approvals",
     icon: ThumbsUp,
     badge: "pending",
+  },
+  {
+    name: "Workflows",
+    href: "/workflows",
+    icon: GitBranch,
+    badge: null,
   },
   {
     name: "Rules Engine",
