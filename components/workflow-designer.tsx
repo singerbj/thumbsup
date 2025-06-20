@@ -1,166 +1,193 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Separator } from "@/components/ui/separator"
-import { 
-  Plus, 
-  Trash2, 
-  Edit, 
-  Save, 
-  ArrowUp, 
-  ArrowDown, 
-  Clock, 
-  Users, 
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import {
+  Plus,
+  Trash2,
+  Edit,
+  Save,
+  ArrowUp,
+  ArrowDown,
+  Clock,
+  Users,
   CheckCircle,
   Eye,
   FileEdit,
-  Send
-} from "lucide-react"
-import { WorkflowTemplate, WorkflowStep, ContentType } from "@/types/workflow"
-import { defaultWorkflowTemplates, getWorkflowTemplatesByContentType } from "@/lib/workflow-templates"
+  Send,
+} from "lucide-react";
+import { WorkflowTemplate, WorkflowStep, ContentType } from "@/types/workflow";
+import {
+  defaultWorkflowTemplates,
+  getWorkflowTemplatesByContentType,
+} from "@/lib/workflow-templates";
 
 interface WorkflowDesignerProps {
-  contentType: ContentType
-  onSave: (template: WorkflowTemplate) => void
-  existingTemplate?: WorkflowTemplate
+  contentType: ContentType;
+  onSave: (template: WorkflowTemplate) => void;
+  existingTemplate?: WorkflowTemplate;
 }
 
 const stepTypeIcons = {
   approval: CheckCircle,
   review: Eye,
   edit: FileEdit,
-  publish: Send
-}
+  publish: Send,
+};
 
 const stepTypeColors = {
   approval: "bg-green-100 text-green-800",
-  review: "bg-blue-100 text-blue-800", 
+  review: "bg-blue-100 text-blue-800",
   edit: "bg-yellow-100 text-yellow-800",
-  publish: "bg-purple-100 text-purple-800"
-}
+  publish: "bg-purple-100 text-purple-800",
+};
 
 const roleOptions = [
-  'content_creator',
-  'content_manager', 
-  'brand_manager',
-  'legal_counsel',
-  'executive',
-  'social_media_manager',
-  'editor',
-  'copywriter',
-  'designer',
-  'marketing_manager',
-  'marketing_director'
-]
+  "content_creator",
+  "content_manager",
+  "brand_manager",
+  "legal_counsel",
+  "executive",
+  "social_media_manager",
+  "editor",
+  "copywriter",
+  "designer",
+  "marketing_manager",
+  "marketing_director",
+];
 
-export function WorkflowDesigner({ contentType, onSave, existingTemplate }: WorkflowDesignerProps) {
+export function WorkflowDesigner({
+  contentType,
+  onSave,
+  existingTemplate,
+}: WorkflowDesignerProps) {
   const [template, setTemplate] = useState<WorkflowTemplate>(
     existingTemplate || {
       id: `custom_${Date.now()}`,
-      name: '',
-      description: '',
+      name: "",
+      description: "",
       contentType,
-      organizationId: 'org-1',
+      organizationId: "org-1",
       steps: [],
       active: true,
       isDefault: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      createdBy: 'user-1'
+      createdBy: "user-1",
     }
-  )
+  );
 
-  const [editingStep, setEditingStep] = useState<string | null>(null)
+  const [editingStep, setEditingStep] = useState<string | null>(null);
 
   const addStep = () => {
     const newStep: WorkflowStep = {
       id: `step-${Date.now()}`,
-      name: 'New Step',
-      description: '',
+      name: "New Step",
+      description: "",
       order: template.steps.length + 1,
-      type: 'review',
+      type: "review",
       required: true,
       assigneeRoles: [],
-      timeLimit: 24
-    }
-    
+      timeLimit: 24,
+    };
+
     setTemplate({
       ...template,
-      steps: [...template.steps, newStep]
-    })
-    setEditingStep(newStep.id)
-  }
+      steps: [...template.steps, newStep],
+    });
+    setEditingStep(newStep.id);
+  };
 
   const updateStep = (stepId: string, updates: Partial<WorkflowStep>) => {
     setTemplate({
       ...template,
-      steps: template.steps.map(step => 
+      steps: template.steps.map((step) =>
         step.id === stepId ? { ...step, ...updates } : step
-      )
-    })
-  }
+      ),
+    });
+  };
 
   const deleteStep = (stepId: string) => {
     setTemplate({
       ...template,
-      steps: template.steps.filter(step => step.id !== stepId)
-        .map((step, index) => ({ ...step, order: index + 1 }))
-    })
-  }
+      steps: template.steps
+        .filter((step) => step.id !== stepId)
+        .map((step, index) => ({ ...step, order: index + 1 })),
+    });
+  };
 
-  const moveStep = (stepId: string, direction: 'up' | 'down') => {
-    const currentIndex = template.steps.findIndex(step => step.id === stepId)
+  const moveStep = (stepId: string, direction: "up" | "down") => {
+    const currentIndex = template.steps.findIndex((step) => step.id === stepId);
     if (
-      (direction === 'up' && currentIndex === 0) ||
-      (direction === 'down' && currentIndex === template.steps.length - 1)
+      (direction === "up" && currentIndex === 0) ||
+      (direction === "down" && currentIndex === template.steps.length - 1)
     ) {
-      return
+      return;
     }
 
-    const newSteps = [...template.steps]
-    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1
-    
-    // Swap steps
-    [newSteps[currentIndex], newSteps[targetIndex]] = [newSteps[targetIndex], newSteps[currentIndex]]
-    
+    const newSteps = [...template.steps];
+    const targetIndex =
+      direction === "up" ? currentIndex - 1 : currentIndex + 1;
+
+    // Ensure targetIndex is within bounds
+    if (targetIndex >= 0 && targetIndex < newSteps.length) {
+      // Swap steps
+      [newSteps[currentIndex], newSteps[targetIndex]] = [
+        newSteps[targetIndex],
+        newSteps[currentIndex],
+      ];
+    }
+
     // Update order
     newSteps.forEach((step, index) => {
-      step.order = index + 1
-    })
+      step.order = index + 1;
+    });
 
     setTemplate({
       ...template,
-      steps: newSteps
-    })
-  }
+      steps: newSteps,
+    });
+  };
 
   const handleSave = () => {
     if (!template.name.trim()) {
-      alert('Please enter a workflow name')
-      return
+      alert("Please enter a workflow name");
+      return;
     }
-    
+
     if (template.steps.length === 0) {
-      alert('Please add at least one step')
-      return
+      alert("Please add at least one step");
+      return;
     }
 
     onSave({
       ...template,
-      updatedAt: new Date().toISOString()
-    })
-  }
+      updatedAt: new Date().toISOString(),
+    });
+  };
 
   const loadTemplate = (templateId: string) => {
-    const existingTemplate = defaultWorkflowTemplates[templateId]
+    const existingTemplate = defaultWorkflowTemplates[templateId];
     if (existingTemplate) {
       setTemplate({
         ...existingTemplate,
@@ -168,12 +195,12 @@ export function WorkflowDesigner({ contentType, onSave, existingTemplate }: Work
         name: `${existingTemplate.name} (Copy)`,
         isDefault: false,
         createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      })
+        updatedAt: new Date().toISOString(),
+      });
     }
-  }
+  };
 
-  const availableTemplates = getWorkflowTemplatesByContentType(contentType)
+  const availableTemplates = getWorkflowTemplatesByContentType(contentType);
 
   return (
     <div className="space-y-6">
@@ -182,7 +209,7 @@ export function WorkflowDesigner({ contentType, onSave, existingTemplate }: Work
         <CardHeader>
           <CardTitle>Workflow Configuration</CardTitle>
           <CardDescription>
-            Design a custom workflow for {contentType.replace('_', ' ')} content
+            Design a custom workflow for {contentType.replace("_", " ")} content
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -192,7 +219,9 @@ export function WorkflowDesigner({ contentType, onSave, existingTemplate }: Work
               <Input
                 id="template-name"
                 value={template.name}
-                onChange={(e) => setTemplate({ ...template, name: e.target.value })}
+                onChange={(e) =>
+                  setTemplate({ ...template, name: e.target.value })
+                }
                 placeholder="Enter workflow name"
               />
             </div>
@@ -212,13 +241,15 @@ export function WorkflowDesigner({ contentType, onSave, existingTemplate }: Work
               </Select>
             </div>
           </div>
-          
+
           <div>
             <Label htmlFor="template-description">Description</Label>
             <Textarea
               id="template-description"
               value={template.description}
-              onChange={(e) => setTemplate({ ...template, description: e.target.value })}
+              onChange={(e) =>
+                setTemplate({ ...template, description: e.target.value })
+              }
               placeholder="Describe this workflow"
               rows={2}
             />
@@ -228,7 +259,9 @@ export function WorkflowDesigner({ contentType, onSave, existingTemplate }: Work
             <Switch
               id="template-active"
               checked={template.active}
-              onCheckedChange={(checked) => setTemplate({ ...template, active: checked })}
+              onCheckedChange={(checked) =>
+                setTemplate({ ...template, active: checked })
+              }
             />
             <Label htmlFor="template-active">Active</Label>
           </div>
@@ -241,7 +274,9 @@ export function WorkflowDesigner({ contentType, onSave, existingTemplate }: Work
           <div className="flex items-center justify-between">
             <div>
               <CardTitle>Workflow Steps</CardTitle>
-              <CardDescription>Define the steps in your approval workflow</CardDescription>
+              <CardDescription>
+                Define the steps in your approval workflow
+              </CardDescription>
             </div>
             <Button onClick={addStep}>
               <Plus className="w-4 h-4 mr-2" />
@@ -286,20 +321,20 @@ export function WorkflowDesigner({ contentType, onSave, existingTemplate }: Work
         </Button>
       </div>
     </div>
-  )
+  );
 }
 
 interface WorkflowStepCardProps {
-  step: WorkflowStep
-  isFirst: boolean
-  isLast: boolean
-  isEditing: boolean
-  onEdit: () => void
-  onSave: () => void
-  onCancel: () => void
-  onUpdate: (updates: Partial<WorkflowStep>) => void
-  onDelete: () => void
-  onMove: (direction: 'up' | 'down') => void
+  step: WorkflowStep;
+  isFirst: boolean;
+  isLast: boolean;
+  isEditing: boolean;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
+  onUpdate: (updates: Partial<WorkflowStep>) => void;
+  onDelete: () => void;
+  onMove: (direction: "up" | "down") => void;
 }
 
 function WorkflowStepCard({
@@ -312,9 +347,9 @@ function WorkflowStepCard({
   onCancel,
   onUpdate,
   onDelete,
-  onMove
+  onMove,
 }: WorkflowStepCardProps) {
-  const StepIcon = stepTypeIcons[step.type]
+  const StepIcon = stepTypeIcons[step.type];
 
   if (isEditing) {
     return (
@@ -323,7 +358,9 @@ function WorkflowStepCard({
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-blue-600">{step.order}</span>
+                <span className="text-sm font-medium text-blue-600">
+                  {step.order}
+                </span>
               </div>
               <Input
                 value={step.name}
@@ -356,7 +393,10 @@ function WorkflowStepCard({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <Label>Step Type</Label>
-              <Select value={step.type} onValueChange={(value: any) => onUpdate({ type: value })}>
+              <Select
+                value={step.type}
+                onValueChange={(value: any) => onUpdate({ type: value })}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -373,8 +413,10 @@ function WorkflowStepCard({
               <Label>Time Limit (hours)</Label>
               <Input
                 type="number"
-                value={step.timeLimit || ''}
-                onChange={(e) => onUpdate({ timeLimit: Number(e.target.value) })}
+                value={step.timeLimit || ""}
+                onChange={(e) =>
+                  onUpdate({ timeLimit: Number(e.target.value) })
+                }
                 placeholder="24"
               />
             </div>
@@ -394,23 +436,25 @@ function WorkflowStepCard({
               {roleOptions.map((role) => (
                 <Badge
                   key={role}
-                  variant={step.assigneeRoles.includes(role) ? "default" : "outline"}
+                  variant={
+                    step.assigneeRoles.includes(role) ? "default" : "outline"
+                  }
                   className="cursor-pointer"
                   onClick={() => {
                     const roles = step.assigneeRoles.includes(role)
-                      ? step.assigneeRoles.filter(r => r !== role)
-                      : [...step.assigneeRoles, role]
-                    onUpdate({ assigneeRoles: roles })
+                      ? step.assigneeRoles.filter((r) => r !== role)
+                      : [...step.assigneeRoles, role];
+                    onUpdate({ assigneeRoles: roles });
                   }}
                 >
-                  {role.replace('_', ' ')}
+                  {role.replace("_", " ")}
                 </Badge>
               ))}
             </div>
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -419,9 +463,11 @@ function WorkflowStepCard({
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4 flex-1">
             <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-              <span className="text-sm font-medium text-gray-600">{step.order}</span>
+              <span className="text-sm font-medium text-gray-600">
+                {step.order}
+              </span>
             </div>
-            
+
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
                 <h4 className="font-medium">{step.name}</h4>
@@ -430,14 +476,16 @@ function WorkflowStepCard({
                   {step.type}
                 </Badge>
                 {step.required && (
-                  <Badge variant="outline" className="text-xs">Required</Badge>
+                  <Badge variant="outline" className="text-xs">
+                    Required
+                  </Badge>
                 )}
               </div>
-              
+
               {step.description && (
                 <p className="text-sm text-gray-600 mb-2">{step.description}</p>
               )}
-              
+
               <div className="flex items-center space-x-4 text-xs text-gray-500">
                 {step.timeLimit && (
                   <div className="flex items-center space-x-1">
@@ -445,7 +493,7 @@ function WorkflowStepCard({
                     <span>{step.timeLimit}h limit</span>
                   </div>
                 )}
-                
+
                 {step.assigneeRoles.length > 0 && (
                   <div className="flex items-center space-x-1">
                     <Users className="w-3 h-3" />
@@ -460,7 +508,7 @@ function WorkflowStepCard({
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => onMove('up')}
+              onClick={() => onMove("up")}
               disabled={isFirst}
             >
               <ArrowUp className="w-4 h-4" />
@@ -468,7 +516,7 @@ function WorkflowStepCard({
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => onMove('down')}
+              onClick={() => onMove("down")}
               disabled={isLast}
             >
               <ArrowDown className="w-4 h-4" />
@@ -483,5 +531,5 @@ function WorkflowStepCard({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
